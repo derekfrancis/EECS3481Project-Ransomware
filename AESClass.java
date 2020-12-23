@@ -158,29 +158,7 @@ public class AESClass {
     	// to decrypt 
     	
      /*
-    	
-    	//AESClass.encrypt(fileContent, key, temp);
-
-        /*
-         * Code to encrypt the file :
-         * 
-         * encrypt(originalString, secretKey, file); 
-         * 
-         * supply the originalString, the secretKey, and the file to be encrypted into the "encrypt" method
-         * - Can remove the comments to see the code in action, that is, to encrypt the file .
-         */
-        
-        
-        /*
-         * Code to decrypt a file :
-         * 
-         * decrypt(originalString, secretKey, file); 
-         * 
-         * supply the originalString, the secretKey, and the file to be encrypted into the "decrypt" method
-         * -Can remove the comments to see the code in action, that is, to decrypt the encrypted file
-         */
-     
-        
+            
     }
                
     
