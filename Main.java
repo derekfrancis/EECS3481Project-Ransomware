@@ -6,6 +6,7 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.security.KeyPair;
 import java.util.Scanner;
 
 /*
@@ -24,17 +25,22 @@ public class Main {
 		String algorithm = "temp";
 		String key = "temp";
 		File[] filesArray = null;
-		String location = null;
 
 		String prime1; // prime number to generate RSA key pair
 		String prime2; // prime number to generate RSA key pair
 		int[] pubKey = new int[2]; // public key for RSA encryption
 		int[] privKey = new int[2]; // private key for RSA decryption
 
+		KeyPair keyPair = null; // Keypair for ECC kp generation
+		String choice; // choice for wether ECC will use manually entered key or generated key.
+
 		Boolean run = true;
 		Boolean fRun = false; // to check if the "folder" command has been run first
 		Boolean tRun = false; // to check if the "type" command has been run first
 		Boolean sRun = false; // to check if the "secrets" command has been run first
+
+		Boolean kpGeneratedBoolean = false; // checks if keypair is generated
+		String location = "";
 
 		while (run == true) {
 
@@ -73,11 +79,16 @@ public class Main {
 
 				tRun = true;
 			} else if (command.compareToIgnoreCase("secrets") == 0) {
-
-				System.out.print("Please enter your chosen key: ");
-				key = scanner.next();
+				if (tRun == true && algorithm.compareToIgnoreCase("ecc") == 0 && !kpGeneratedBoolean) {
+					System.out.println("Generating Keypair for ECC algorithm.");
+					keyPair = ecc.generateECKeyPair();
+					System.out.println("Keypair generated.");
+					kpGeneratedBoolean = true;
+				}
 
 				if (tRun == true && algorithm.equalsIgnoreCase("rsa")) {
+					System.out.print("Please enter your chosen key: ");
+					key = scanner.next();
 					try {
 						RSAProject.keyPairGenerator();
 					} catch (Exception E) {
@@ -85,6 +96,9 @@ public class Main {
 
 					RSAProject.generateAESKeys(key, location); // generates the AES Secret key object and creates the
 																// file AESKey.txt that stores the AES key.
+				} else {
+					System.out.print("Please enter your chosen key: ");
+					key = scanner.next();
 				}
 
 				sRun = true;
@@ -156,15 +170,24 @@ public class Main {
 							}
 
 						}
-						RSAProject.encrypt(location); // encrypt the AES key
+						RSAProject.encrypt(location); // this first encrypting the aes key that is later used for
+						// encrypting the files.
 
-						System.out.println("Encryption complete.");
+						System.out.println("enccryption complete.");
 					}
 					if (algorithm.compareToIgnoreCase("ecc") == 0) {
 						// linked to encryption of ECC code
+						System.out.println("Use generated keypair or manually entered base64 key? Enter kp or man:");
+						choice = scanner.next();
+
 						for (int i = 0; i < filesArray.length; i++) {
 							File j = filesArray[i];
-							// TODO call encryption method of ECC here with file j and string key
+							if (choice.compareToIgnoreCase("kp") == 0 && kpGeneratedBoolean) {
+								ecc.encrypt(keyPair.getPublic(), j);
+							}
+							if (choice.compareToIgnoreCase("man") == 0) {
+								ecc.encrypt(ecc.base64toPublicKey(key), j);
+							}
 						}
 
 						System.out.println("Encryption complete.");
@@ -226,6 +249,7 @@ public class Main {
 					}
 					if (algorithm.compareToIgnoreCase("rsa") == 0) {
 						// linked to decryption of RSA code
+						// linked to decryption of RSA code
 						RSAProject.decrypt(location); // this first decrypts the aes key that is later used for
 														// encrypting the files.
 
@@ -244,9 +268,17 @@ public class Main {
 					}
 					if (algorithm.compareToIgnoreCase("ecc") == 0) {
 						// linked to decryption of ECC code
+						System.out.println("Use generated keypair or manually entered base64 key? Enter kp or man:");
+						choice = scanner.next();
+
 						for (int i = 0; i < filesArray.length; i++) {
 							File j = filesArray[i];
-							// TODO call decryption method of ECC here with file j and string key
+							if (choice.compareToIgnoreCase("kp") == 0 && kpGeneratedBoolean) {
+								ecc.decrypt(keyPair.getPrivate(), j);
+							}
+							if (choice.compareToIgnoreCase("man") == 0) {
+								ecc.decrypt(ecc.base64toPrivateKey(key), j);
+							}
 						}
 
 						System.out.println("Decryption complete.");
